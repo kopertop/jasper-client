@@ -34,6 +34,8 @@ class Mic:
                           "that pop up during this process are normal and " +
                           "can usually be safely ignored.")
         self._audio = pyaudio.PyAudio()
+        # Get the Audio Input Device
+        self._audio_device = self._audio.get_default_input_device_info()
         self._logger.info("Initialization of PyAudio completed.")
 
     def __del__(self):
@@ -48,7 +50,7 @@ class Mic:
 
         # TODO: Consolidate variables from the next three functions
         THRESHOLD_MULTIPLIER = 1.8
-        RATE = 16000
+        RATE = int(self._audio_device['defaultSampleRate'])
         CHUNK = 1024
 
         # number of seconds to allow to establish threshold
@@ -56,10 +58,13 @@ class Mic:
 
         # prepare recording stream
         stream = self._audio.open(format=pyaudio.paInt16,
-                                  channels=1,
+                                  channels=self._audio_device['maxInputChannels'],
                                   rate=RATE,
+                                  frames_per_buffer=CHUNK,
                                   input=True,
-                                  frames_per_buffer=CHUNK)
+                                  input_device_index=self._audio_device['index'])
+
+
 
         # stores the audio data
         frames = []
@@ -93,7 +98,7 @@ class Mic:
         """
 
         THRESHOLD_MULTIPLIER = 1.8
-        RATE = 16000
+        RATE = int(self._audio_device['defaultSampleRate'])
         CHUNK = 1024
 
         # number of seconds to allow to establish threshold
@@ -104,10 +109,12 @@ class Mic:
 
         # prepare recording stream
         stream = self._audio.open(format=pyaudio.paInt16,
-                                  channels=1,
+                                  channels=self._audio_device['maxInputChannels'],
                                   rate=RATE,
+                                  frames_per_buffer=CHUNK,
                                   input=True,
-                                  frames_per_buffer=CHUNK)
+                                  input_device_index=self._audio_device['index'])
+
 
         # stores the audio data
         frames = []
@@ -202,7 +209,7 @@ class Mic:
             Returns a list of the matching options or None
         """
 
-        RATE = 16000
+        RATE = int(self._audio_device['defaultSampleRate'])
         CHUNK = 1024
         LISTEN_TIME = 12
 
@@ -214,10 +221,12 @@ class Mic:
 
         # prepare recording stream
         stream = self._audio.open(format=pyaudio.paInt16,
-                                  channels=1,
+                                  channels=self._audio_device['maxInputChannels'],
                                   rate=RATE,
+                                  frames_per_buffer=CHUNK,
                                   input=True,
-                                  frames_per_buffer=CHUNK)
+                                  input_device_index=self._audio_device['index'])
+
 
         frames = []
         # increasing the range # results in longer pause after command

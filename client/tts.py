@@ -61,18 +61,12 @@ class AbstractTTSEngine(object):
         pass
 
     def play(self, filename):
-        # FIXME: Use platform-independent audio-output here
-        # See issue jasperproject/jasper-client#188
-        cmd = ['aplay', '-D', 'hw:1,0', str(filename)]
-        self._logger.debug('Executing %s', ' '.join([pipes.quote(arg)
-                                                     for arg in cmd]))
-        with tempfile.TemporaryFile() as f:
-            subprocess.call(cmd, stdout=f, stderr=f)
-            f.seek(0)
-            output = f.read()
-            if output:
-                self._logger.debug("Output was: '%s'", output)
-
+	import pygame
+	pygame.mixer.init(32000)
+	pygame.mixer.music.load(filename)
+	pygame.mixer.music.play()
+	while pygame.mixer.music.get_busy() == True:
+		continue
 
 class AbstractMp3TTSEngine(AbstractTTSEngine):
     """
@@ -84,19 +78,7 @@ class AbstractMp3TTSEngine(AbstractTTSEngine):
                 diagnose.check_python_import('mad'))
 
     def play_mp3(self, filename):
-        mf = mad.MadFile(filename)
-        with tempfile.NamedTemporaryFile(suffix='.wav') as f:
-            wav = wave.open(f, mode='wb')
-            wav.setframerate(mf.samplerate())
-            wav.setnchannels(1 if mf.mode() == mad.MODE_SINGLE_CHANNEL else 2)
-            # 4L is the sample width of 32 bit audio
-            wav.setsampwidth(4L)
-            frame = mf.read()
-            while frame is not None:
-                wav.writeframes(frame)
-                frame = mf.read()
-            wav.close()
-            self.play(f.name)
+        return self.play(filename)
 
 
 class DummyTTS(AbstractTTSEngine):
