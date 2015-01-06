@@ -83,7 +83,7 @@ class Mic:
                 lastN.pop(0)
                 lastN.append(self.getScore(data))
                 average = sum(lastN) / len(lastN)
-            except:
+            except IOError:
                 pass
 
         stream.stop_stream()
@@ -136,8 +136,8 @@ class Mic:
                 lastN.pop(0)
                 lastN.append(self.getScore(data))
                 average = sum(lastN) / len(lastN)
-            except:
-                pass
+            except IOError:
+                break
 
         # this will be the benchmark to cause a disturbance over!
         THRESHOLD = average * THRESHOLD_MULTIPLIER
@@ -159,8 +159,8 @@ class Mic:
                 if score > THRESHOLD:
                     didDetect = True
                     break
-            except:
-                pass
+            except IOError:
+                break
 
         # no use continuing if no flag raised
         if not didDetect:
@@ -178,8 +178,8 @@ class Mic:
             try:
                 data = stream.read(CHUNK)
                 frames.append(data)
-            except:
-                pass
+            except IOError:
+                break
 
         # save the audio data
         stream.stop_stream()
@@ -259,7 +259,7 @@ class Mic:
                 # TODO: 0.8 should not be a MAGIC NUMBER!
                 if average < THRESHOLD * 0.8:
                     break
-            except:
+            except IOError:
                 pass
 
 
